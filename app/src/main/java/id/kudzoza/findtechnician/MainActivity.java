@@ -1,7 +1,11 @@
 package id.kudzoza.findtechnician;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -16,6 +20,8 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -31,10 +37,11 @@ import id.kudzoza.findtechnician.model.TypeModel;
 public class MainActivity extends AppCompatActivity {
 
     FirebaseFirestore db = FirebaseFirestore.getInstance();
+    FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
     ArrayList<TypeModel> typeList = new ArrayList<>();
     TypeAdapter typeAdapter;
     ProgressBar loader;
-    private String collectionPath = "type";
+    private String collectionPath = "channel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +82,7 @@ public class MainActivity extends AppCompatActivity {
     private void insertToDb(final Map document) {
         typeList.clear();
         typeAdapter.notifyDataSetChanged();
-        db.collection("type")
+        db.collection(collectionPath)
                 .add(document)
                 .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
                     @Override
@@ -125,5 +132,22 @@ public class MainActivity extends AppCompatActivity {
     private void showMessage(String message) {
         Toast.makeText(getApplicationContext(), message, Toast.LENGTH_LONG).show();
         Log.d("Message : ", message);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_signout) {
+            firebaseAuth.signOut();
+            startActivity(new Intent(getApplicationContext(), RegisterActivity.class));
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 }
